@@ -32,19 +32,4 @@ class ConfirmActivity : AppCompatActivity() {
 
     }
 
-    fun showDialog(){
-        val dialog: AlertDialog.Builder = Builder(this@MainActivity)
-        dialog.setCancelable(false)
-        dialog.setTitle("Dialog on Android")
-        dialog.setMessage("Are you sure you want to delete this entry?")
-        dialog.setPositiveButton("Delete", DialogInterface.OnClickListener { dialog, id ->
-            //Action for "Delete".
-        })
-            .setNegativeButton("Cancel ", DialogInterface.OnClickListener { dialog, which ->
-                //Action for "Cancel".
-            })
-
-        val alert: AlertDialog = dialog.create()
-        alert.show()
-    }
 }
