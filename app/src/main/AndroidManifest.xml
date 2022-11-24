@@ -3,6 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.lxn.gdghanoicheckin">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -14,6 +20,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GDGHaNoiCheckin"
         tools:targetApi="31">
+        <activity
+            android:name=".ConfirmActivity"
+            android:exported="false" />
         <activity
             android:name=".CreateQRActivity"
             android:exported="false" />

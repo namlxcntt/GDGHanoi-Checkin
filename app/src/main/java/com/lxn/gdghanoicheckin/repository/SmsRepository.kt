@@ -6,6 +6,7 @@ import com.lxn.gdghanoicheckin.constant.DataState
 import com.lxn.gdghanoicheckin.logError
 import com.lxn.gdghanoicheckin.network.model.SaveObject
 import com.lxn.gdghanoicheckin.network.retrofit.ApiService
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flow
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -24,7 +25,6 @@ class SmsRepository(
     private var checkSms: Int = 0
 
     fun getAllEmailFromSheet() = flow {
-        emit(DataState.Loading)
         val response = smsRetrofit.getAllEmailFromSheet()
         try {
             emit(DataState.Success(response))
@@ -64,12 +64,23 @@ class SmsRepository(
         }
         uploadTask.addOnSuccessListener { snapshot ->
             storageRef.downloadUrl.addOnSuccessListener {
-                val uri = it
+                val saveObject = SaveObject(
+                    action = "save",
+                    content = it.toString(),
+                    from = data.first
+                )
+                sendQrContent(saveObject)
                 logError("Upload image Success")
-                logError("Url -> $uri")
             }
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    fun sendQrContent(saveObject: SaveObject) {
+        GlobalScope.launch(Dispatchers.IO) {
+            smsRetrofit.sendQrContent(saveObject)
+            logError("Push To sheet")
+        }
+    }
 
 }
