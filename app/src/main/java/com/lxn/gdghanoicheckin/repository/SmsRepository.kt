@@ -3,7 +3,7 @@ package com.lxn.gdghanoicheckin.repository
 import android.graphics.Bitmap
 import com.google.firebase.storage.FirebaseStorage
 import com.lxn.gdghanoicheckin.constant.DataState
-import com.lxn.gdghanoicheckin.logError
+import com.lxn.gdghanoicheckin.utils.logError
 import com.lxn.gdghanoicheckin.network.model.SaveObject
 import com.lxn.gdghanoicheckin.network.retrofit.ApiService
 import kotlinx.coroutines.*
