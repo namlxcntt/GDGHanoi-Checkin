@@ -33,17 +33,13 @@ class SmsRepository(
         }
     }
 
-    suspend fun sendSms(data: SaveObject) {
-//        try {
-//            val smsMatch = smsRetrofit.sendQrContent(data)
-//            sendDataToFirebase(data)
-//        } catch (exception: Exception) {
-//            if (checkSms == 0) {
-//                sendSmsPhoneNumber(Constant.PHONE_NUMBER, Constant.MESSAGE_NO_INTERNET)
-//                checkSms += 1
-//            }
-//            sendSmsPhoneNumber(Constant.PHONE_NUMBER, "From : ${data.from} \n ${data.content}")
-//        }
+    fun getEmailByCheck() = flow{
+        val response = smsRetrofit.getEmailByCheck()
+        try {
+            emit(DataState.Success(response))
+        } catch (exception: Exception) {
+            emit(DataState.Error(exception))
+        }
     }
 
     private fun getDate(milliSeconds: Long): String? {
@@ -62,7 +58,7 @@ class SmsRepository(
         uploadTask.addOnFailureListener {
             logError("Upload image failure")
         }
-        uploadTask.addOnSuccessListener { snapshot ->
+        uploadTask.addOnSuccessListener { _ ->
             storageRef.downloadUrl.addOnSuccessListener {
                 val saveObject = SaveObject(
                     action = "save",

@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lxn.gdghanoicheckin.constant.DataState
+import com.lxn.gdghanoicheckin.constant.TypeCheckIn
 import com.lxn.gdghanoicheckin.repository.SmsRepository
 import com.lxn.gdghanoicheckin.utils.logError
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,21 +18,28 @@ class ConfirmViewModel @Inject constructor(
     private val repository: SmsRepository,
     private val application: Application
 ) : ViewModel() {
-    val dataCheckLive: MutableLiveData<Pair<Boolean, String>> = MutableLiveData()
+    val dataCheckLive: MutableLiveData<Triple<Boolean, String, TypeCheckIn>> = MutableLiveData()
 
     fun getAllEmailFromSheetAndCheck(email: String) {
-        repository.getAllEmailFromSheet()
+        repository.getEmailByCheck()
             .flowOn(Dispatchers.IO)
             .map {
                 when (it) {
                     is DataState.Success -> {
-                        val listData = it.data
-                        if (listData.contains(email)) {
-                            return@map Pair(true, email)
+                        val listData = it.data.subList(1,it.data.size)
+                        listData.forEach { data ->
+                            val emailApi = data.substringBefore("-")
+                            if (emailApi == email.substringBefore("-")) {
+                                if (data.contains(TypeCheckIn.Vip.value)) {
+                                    return@map Triple(true, emailApi, TypeCheckIn.Vip)
+                                } else {
+                                    return@map Triple(true, emailApi, TypeCheckIn.Normal)
+                                }
+                            }
                         }
-                        return@map Pair(false, email)
+                        return@map Triple(false, email, TypeCheckIn.Normal)
                     }
-                    else -> return@map Pair(false, email)
+                    else -> return@map Triple(false, email, TypeCheckIn.Normal)
                 }
             }.onEach {
                 dataCheckLive.value = it

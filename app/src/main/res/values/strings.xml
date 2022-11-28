@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GDGHaNoiCheckin</string>
+    <string name="content_role">Vai trò :%s</string>
 </resources>

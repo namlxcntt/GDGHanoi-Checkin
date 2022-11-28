@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.lxn.gdghanoicheckin.R
+import com.lxn.gdghanoicheckin.constant.TypeCheckIn
 import com.lxn.gdghanoicheckin.popup.EditBarcodeNameDialogFragment
 import com.lxn.gdghanoicheckin.viewmodel.ConfirmViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,30 +31,33 @@ class ConfirmActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_confirm)
         val text = intent.getStringExtra(KEY)
-        loadingView.isVisible = true
-        viewModel.dataCheckLive.observe(this) {
-            loadingView.isVisible = false
-            if (it.first) {
-                showPopUpDialog(it.second)
-            }
-        }
+        showLoading()
+        observeData()
+
         viewModel.getAllEmailFromSheetAndCheck(text ?: "")
 
     }
 
-    fun showLoading() {
-
+    private fun observeData() {
+        viewModel.dataCheckLive.observe(this) {
+            loadingView.isVisible = false
+            if (it.first) {
+                showPopUpDialog(it.second,it.third)
+            }
+        }
     }
 
-    private fun onClickApprove() {
-        finish()
+    private fun showLoading() {
+        loadingView.isVisible = true
     }
 
-    private fun showPopUpDialog(name: String) {
+
+    private fun showPopUpDialog(name: String,type : TypeCheckIn) {
         val errorDialog =
             EditBarcodeNameDialogFragment.newInstance(
                 name = name,
-                ::onClickApprove
+                ::finish,
+                typeCheckIn = type
             )
         errorDialog.show(supportFragmentManager, "")
     }

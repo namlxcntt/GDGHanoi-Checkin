@@ -7,14 +7,23 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.fragment.app.DialogFragment
 import com.lxn.gdghanoicheckin.R
+import com.lxn.gdghanoicheckin.constant.TypeCheckIn
+import kotlinx.android.synthetic.main.dialog_edit_barcode_name.*
 
-class EditBarcodeNameDialogFragment(val onClickApprove: () -> Unit) : DialogFragment() {
+class EditBarcodeNameDialogFragment(
+    private val onClickApprove: () -> Unit,
+    private val typeCheckIn: TypeCheckIn
+) : DialogFragment() {
 
     companion object {
         private const val NAME_KEY = "NAME_KEY"
 
-        fun newInstance(name: String?, onClickApprove: () -> Unit): EditBarcodeNameDialogFragment {
-            return EditBarcodeNameDialogFragment(onClickApprove).apply {
+        fun newInstance(
+            name: String?,
+            onClickApprove: () -> Unit,
+            typeCheckIn: TypeCheckIn
+        ): EditBarcodeNameDialogFragment {
+            return EditBarcodeNameDialogFragment(onClickApprove, typeCheckIn).apply {
                 arguments = Bundle().apply {
                     putString(NAME_KEY, name)
                 }
@@ -32,8 +41,14 @@ class EditBarcodeNameDialogFragment(val onClickApprove: () -> Unit) : DialogFrag
         dialog?.show()
 
         val content = dialog?.findViewById<AppCompatTextView>(R.id.tv_content)
+        val tvType = dialog?.findViewById<AppCompatTextView>(R.id.tv_type)
 
         content?.text = name
+
+        tvType?.text = getString(
+            R.string.content_role,
+            if (typeCheckIn == TypeCheckIn.Vip) "Khách vip" else "Người tham dự"
+        )
 
         val button = dialog?.findViewById<AppCompatButton>(R.id.btn_accept)
 
@@ -41,21 +56,6 @@ class EditBarcodeNameDialogFragment(val onClickApprove: () -> Unit) : DialogFrag
             onClickApprove.invoke()
         }
 
-//        val txt = dialog?.findViewById<EditText>(R.id.edit_text_barcode_name)
-//
-//        if (txt != null) {
-//        }
-//
-//        val yesBt = dialog?.findViewById<TextView>(R.id.tv_accept)
-//        yesBt?.setOnClickListener {
-//            listener?.onNameConfirmed(txt?.text.toString())
-//            dialog.dismiss()
-//        }
-//
-//        val cancelBt = dialog?.findViewById<TextView>(R.id.tv_cancel)
-//        cancelBt?.setOnClickListener {
-//            dialog.dismiss()
-//        }
         return dialog!!
     }
 

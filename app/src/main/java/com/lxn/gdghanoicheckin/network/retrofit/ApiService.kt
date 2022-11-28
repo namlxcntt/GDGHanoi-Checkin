@@ -1,5 +1,6 @@
 package com.lxn.gdghanoicheckin.network.retrofit
 
+import com.lxn.gdghanoicheckin.network.model.DataResponse
 import com.lxn.gdghanoicheckin.network.model.SaveObject
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -23,6 +24,9 @@ interface ApiService {
      * Còn bthg dùng @query
      */
     @GET("exec?method=getAll")
-    suspend fun getAllEmailFromSheet() : List<String>
+    suspend fun getAllEmailFromSheet() : DataResponse
+
+    @GET("exec?method=check")
+    suspend fun getEmailByCheck() : List<String>
 
 }
