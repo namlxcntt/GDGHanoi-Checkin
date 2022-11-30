@@ -6,11 +6,13 @@
         <entry key="app/src/main/res/drawable/ic_button.xml" value="0.295" />
         <entry key="app/src/main/res/drawable/shape_bg_white_radius.xml" value="0.1665" />
         <entry key="app/src/main/res/layout/activity_confirm.xml" value="0.16847826086956522" />
-        <entry key="app/src/main/res/layout/activity_create_qractivity.xml" value="0.39166666666666666" />
+        <entry key="app/src/main/res/layout/activity_create_qractivity.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_scan_qractivity.xml" value="0.39166666666666666" />
         <entry key="app/src/main/res/layout/dialog_edit_barcode_name.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/dialog_no_account.xml" value="0.32864583333333336" />
         <entry key="app/src/main/res/layout/layout_dialog_confirm.xml" value="0.1831306990881459" />
+        <entry key="app/src/main/res/layout/layout_dialog_require_password.xml" value="0.2874873353596758" />
       </map>
     </option>
   </component>

@@ -3,6 +3,8 @@ package com.lxn.gdghanoicheckin.viewmodel
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lxn.gdghanoicheckin.R
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,6 +30,11 @@ class CreateQrViewModel @Inject constructor(
     private val repository: SmsRepository,
     private val application: Application
 ) : ViewModel() {
+
+    private val _uploadState : MutableLiveData<Boolean> = MutableLiveData(false)
+
+    val uploadState : LiveData<Boolean> get() = _uploadState
+
 
     init {
     }
@@ -83,9 +91,13 @@ class CreateQrViewModel @Inject constructor(
         }
     }
 
-    private fun uploadImageToFirebase(data: Pair<String, Bitmap>) {
+    private suspend fun uploadImageToFirebase(data: Pair<String, Bitmap>) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.saveImageAndPushSheet(data)
+            withContext(Dispatchers.Main){
+                _uploadState.value = true
+            }
         }
+
     }
 }
