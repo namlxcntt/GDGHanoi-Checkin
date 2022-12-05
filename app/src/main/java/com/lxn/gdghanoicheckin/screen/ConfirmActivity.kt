@@ -66,6 +66,7 @@ class ConfirmActivity : AppCompatActivity() {
                 ::finish,
                 typeCheckIn = type
             )
+        errorDialog.isCancelable = false
         errorDialog.show(supportFragmentManager, "")
     }
 

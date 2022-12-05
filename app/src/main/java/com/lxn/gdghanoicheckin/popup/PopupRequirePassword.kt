@@ -30,6 +30,7 @@ class PopupRequirePassword(
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = context?.let { Dialog(it, R.style.AppThemeNew_DialogTheme) }
         dialog?.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        dialog?.setCancelable(false)
         dialog?.setContentView(R.layout.layout_dialog_require_password)
         dialog?.show()
 

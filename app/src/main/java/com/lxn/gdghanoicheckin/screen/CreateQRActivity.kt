@@ -2,18 +2,18 @@ package com.lxn.gdghanoicheckin.screen
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.viewModels
-import com.lxn.gdghanoicheckin.viewmodel.CreateQrViewModel
+import androidx.appcompat.app.AppCompatActivity
 import com.lxn.gdghanoicheckin.R
-import com.lxn.gdghanoicheckin.popup.EditBarcodeNameDialogFragment
 import com.lxn.gdghanoicheckin.popup.PopupRequirePassword
+import com.lxn.gdghanoicheckin.viewmodel.CreateQrViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_create_qractivity.*
 
 @AndroidEntryPoint
 class CreateQRActivity : AppCompatActivity() {
+
     companion object {
         fun startActivity(context: Context) {
             val intent = Intent(context, CreateQRActivity::class.java)
@@ -26,12 +26,14 @@ class CreateQRActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_qractivity)
-        PopupRequirePassword.newInstance {
+        val popupRequirePassword = PopupRequirePassword.newInstance {
             viewModel.getAllEmailFromSheet()
             viewModel.uploadState.observe(this) {
-
             }
-        }.show(supportFragmentManager,"Hello")
+        }
+        popupRequirePassword.isCancelable = false
+        popupRequirePassword.show(supportFragmentManager, "Hello")
 
     }
+
 }
