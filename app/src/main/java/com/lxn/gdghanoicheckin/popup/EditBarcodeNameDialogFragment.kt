@@ -47,7 +47,7 @@ class EditBarcodeNameDialogFragment(
 
         tvType?.text = getString(
             R.string.content_role,
-            if (typeCheckIn == TypeCheckIn.Vip) "Khách vip" else "Người tham dự"
+            if (typeCheckIn == TypeCheckIn.Vip) "Khách VIP" else "Người tham dự"
         )
 
         val button = dialog?.findViewById<AppCompatButton>(R.id.btn_accept)
