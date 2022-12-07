@@ -19,14 +19,21 @@ interface ApiService {
     @POST("exec")
     suspend fun sendQrContent(@Body smsObject: SaveObject)
 
+    @POST("exec")
+    suspend fun sendQrScanned(@Body smsObject: SaveObject)
+
     /**
      * Viết thế này cho nhanh
      * Còn bthg dùng @query
      */
     @GET("exec?method=getAll")
-    suspend fun getAllEmailFromSheet() : DataResponse
+    suspend fun getAllEmailFromSheet(): DataResponse
 
     @GET("exec?method=check")
-    suspend fun getEmailByCheck() : List<String>
+    suspend fun getEmailByCheck(): List<String>
+
+
+    @GET("exec?method=checkScanned")
+    suspend fun getEmailScanned(): List<String>
 
 }

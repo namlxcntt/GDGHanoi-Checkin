@@ -44,7 +44,12 @@ class ConfirmActivity : AppCompatActivity() {
             if (it.first) {
                 showPopUpDialog(it.second, it.third)
             } else {
-                showPopupError()
+               val message = if (it.third == TypeCheckIn.IsExited){
+                   "Tài khoản đã tồn tại"
+                }else{
+                  "Rất tiếc, chúng tôi không tìm thấy tài khoản này"
+                }
+                showPopupError(message)
             }
         }
     }
@@ -53,8 +58,8 @@ class ConfirmActivity : AppCompatActivity() {
         loadingView.isVisible = true
     }
 
-    private fun showPopupError() {
-        val errorDialog = PopupNoAccount.newInstance(::finish)
+    private fun showPopupError(message : String) {
+        val errorDialog = PopupNoAccount.newInstance(message, ::finish)
         errorDialog.show(supportFragmentManager, "")
     }
 

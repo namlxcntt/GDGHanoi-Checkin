@@ -3,11 +3,14 @@ package com.lxn.gdghanoicheckin.repository
 import android.graphics.Bitmap
 import com.google.firebase.storage.FirebaseStorage
 import com.lxn.gdghanoicheckin.constant.DataState
-import com.lxn.gdghanoicheckin.utils.logError
 import com.lxn.gdghanoicheckin.network.model.SaveObject
 import com.lxn.gdghanoicheckin.network.retrofit.ApiService
-import kotlinx.coroutines.*
+import com.lxn.gdghanoicheckin.utils.logError
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -33,10 +36,11 @@ class SmsRepository(
         }
     }
 
-    fun getEmailByCheck() = flow{
+    fun getEmailByCheck() = flow {
         val response = smsRetrofit.getEmailByCheck()
+        val responseCheck = smsRetrofit.getEmailScanned()
         try {
-            emit(DataState.Success(response))
+            emit(DataState.Success(Pair(response,responseCheck)))
         } catch (exception: Exception) {
             emit(DataState.Error(exception))
         }
@@ -77,6 +81,10 @@ class SmsRepository(
             smsRetrofit.sendQrContent(saveObject)
             logError("Push To sheet")
         }
+    }
+
+    suspend fun sendQRScanObject(saveObject: SaveObject) {
+        smsRetrofit.sendQrScanned(saveObject)
     }
 
 }
