@@ -61,11 +61,31 @@ object BarcodeImageGenerator {
             setPixels(pixels, 0, width, 0, 0, width, height)
         }
     }
+
+    fun scaleBitmap(bitmapToScale: Bitmap?, newWidth: Float, newHeight: Float): Bitmap? {
+        if (bitmapToScale == null) return null
+        //get the original width and height
+        val width = bitmapToScale.width
+        val height = bitmapToScale.height
+        // create a matrix for the manipulation
+        val matrix = Matrix()
+        matrix.postScale(newWidth / width, newHeight / height)
+
+        return Bitmap.createBitmap(
+            bitmapToScale,
+            0,
+            0,
+            bitmapToScale.width,
+            bitmapToScale.height,
+            matrix,
+            true
+        )
+    }
     fun Bitmap.addOverlayToCenter(overlayBitmap: Bitmap): Bitmap {
         val bitmap2Width = overlayBitmap.width
         val bitmap2Height = overlayBitmap.height
         val marginLeft = (this.width * 0.5 - bitmap2Width * 0.5).toFloat()
-        val marginTop = (this.height * 0.5 - bitmap2Height * 0.5).toFloat()
+        val marginTop = (this.height * 0.65 - bitmap2Height * 0.65).toFloat()
         val canvas = Canvas(this)
         canvas.drawBitmap(this, Matrix(), null)
         canvas.drawBitmap(overlayBitmap, marginLeft, marginTop, null)

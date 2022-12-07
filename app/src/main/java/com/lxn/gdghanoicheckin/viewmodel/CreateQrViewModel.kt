@@ -31,9 +31,9 @@ class CreateQrViewModel @Inject constructor(
     private val application: Application
 ) : ViewModel() {
 
-    private val _uploadState : MutableLiveData<Boolean> = MutableLiveData(false)
+    private val _uploadState: MutableLiveData<Boolean> = MutableLiveData(false)
 
-    val uploadState : LiveData<Boolean> get() = _uploadState
+    val uploadState: LiveData<Boolean> get() = _uploadState
 
 
     init {
@@ -80,13 +80,25 @@ class CreateQrViewModel @Inject constructor(
             val newList = arrayListOf<String>()
             newList.addAll(listMerge)
             newList.removeAt(0)
-            newList.forEach {
-                logError("Data new -> $it")
+            newList.forEach { data ->
+                logError("Data new -> $data")
                 delay(1000)
-                val bitmap = BarcodeImageGenerator.generateBitmap(it, 5000, 5000).copy(Bitmap.Config.ARGB_8888, true)
-                val bitmapCenter = BitmapFactory.decodeResource(application.resources, R.drawable.bg_qr).copy(Bitmap.Config.ARGB_8888, true)
-                val mergeBitmap = bitmapCenter.addOverlayToCenter(bitmap)
-                uploadImageToFirebase((Pair(it, mergeBitmap)))
+                val bitmap = BarcodeImageGenerator.scaleBitmap(
+                    BarcodeImageGenerator.generateBitmap(
+                        data,
+                        1792,
+                        1792,
+                    ).copy(Bitmap.Config.ARGB_8888, true),
+                    3584f, 3584f,
+                )
+                bitmap?.let { bit ->
+                    val bitmapCenter = BitmapFactory.decodeResource(application.resources, R.drawable.resize_bg_qr).copy(Bitmap.Config.ARGB_8888, true)
+                    val mergeBitmap = bitmapCenter.addOverlayToCenter(bit)
+                    bitmapCenter?.let {
+                        uploadImageToFirebase((Pair(data, mergeBitmap)))
+                    }
+                }
+
             }
         }
     }
@@ -94,7 +106,7 @@ class CreateQrViewModel @Inject constructor(
     private suspend fun uploadImageToFirebase(data: Pair<String, Bitmap>) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.saveImageAndPushSheet(data)
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 _uploadState.value = true
             }
         }
