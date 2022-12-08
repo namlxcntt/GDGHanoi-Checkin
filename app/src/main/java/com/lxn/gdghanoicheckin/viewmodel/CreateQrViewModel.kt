@@ -3,6 +3,7 @@ package com.lxn.gdghanoicheckin.viewmodel
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -15,14 +16,8 @@ import com.lxn.gdghanoicheckin.qr.BarcodeImageGenerator.addOverlayToCenter
 import com.lxn.gdghanoicheckin.repository.SmsRepository
 import com.lxn.gdghanoicheckin.utils.logError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,27 +57,30 @@ class CreateQrViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    @OptIn(FlowPreview::class)
     private fun generatedQr(list: DataResponse) {
         viewModelScope.launch(Dispatchers.IO) {
             val listMerge: ArrayList<String> = ArrayList()
-            list.forEach { dataResponse ->
-                val stringBuilder = StringBuilder()
-                dataResponse.forEachIndexed { index, subData ->
-                    if (index != 0) {
-                        stringBuilder.append("-$subData")
-                    } else {
-                        stringBuilder.append(subData)
+            withContext(Dispatchers.Unconfined) {
+                list.forEach { dataResponse ->
+                    val stringBuilder = StringBuilder()
+                    dataResponse.forEachIndexed { index, subData ->
+                        if (index != 0) {
+                            stringBuilder.append("-$subData")
+                        } else {
+                            stringBuilder.append(subData)
+                        }
                     }
+                    listMerge.add(stringBuilder.toString())
                 }
-                listMerge.add(stringBuilder.toString())
             }
 
             val newList = arrayListOf<String>()
             newList.addAll(listMerge)
             newList.removeAt(0)
+
             newList.forEach { data ->
                 logError("Data new -> $data")
-                delay(1000)
                 val bitmap = BarcodeImageGenerator.scaleBitmap(
                     BarcodeImageGenerator.generateBitmap(
                         data,
@@ -92,24 +90,28 @@ class CreateQrViewModel @Inject constructor(
                     3584f, 3584f,
                 )
                 bitmap?.let { bit ->
-                    val bitmapCenter = BitmapFactory.decodeResource(application.resources, R.drawable.resize_bg_qr).copy(Bitmap.Config.ARGB_8888, true)
+                    val bitmapCenter =
+                        BitmapFactory.decodeResource(application.resources, R.drawable.resize_bg_qr)
+                            .copy(Bitmap.Config.ARGB_8888, true)
                     val mergeBitmap = bitmapCenter.addOverlayToCenter(bit)
                     bitmapCenter?.let {
-                        uploadImageToFirebase((Pair(data, mergeBitmap)))
+                        repository.awaitSinglePushValue(Pair(data, mergeBitmap))
+                            .flowOn(Dispatchers.IO)
+                            .flatMapConcat {
+                                return@flatMapConcat repository.sendQrContent(it)
+                            }
+                            .flowOn(Dispatchers.IO)
+                            .onEach {
+                                Log.e("Namlxcntt","Push Data Success")
+                            }
+                            .catch {
+                                Log.e("Namlxcntt", "Error ${it.message}")
+                            }.launchIn(viewModelScope)
                     }
                 }
-
+                delay(10000L)
             }
         }
     }
 
-    private suspend fun uploadImageToFirebase(data: Pair<String, Bitmap>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.saveImageAndPushSheet(data)
-            withContext(Dispatchers.Main) {
-                _uploadState.value = true
-            }
-        }
-
-    }
 }

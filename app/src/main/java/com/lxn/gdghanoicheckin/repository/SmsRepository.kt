@@ -1,19 +1,20 @@
 package com.lxn.gdghanoicheckin.repository
 
 import android.graphics.Bitmap
+import android.net.Uri
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
 import com.lxn.gdghanoicheckin.constant.DataState
 import com.lxn.gdghanoicheckin.network.model.SaveObject
 import com.lxn.gdghanoicheckin.network.retrofit.ApiService
 import com.lxn.gdghanoicheckin.utils.logError
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
-import java.text.SimpleDateFormat
-import java.util.*
 
 
 /**
@@ -25,7 +26,6 @@ class SmsRepository(
     private val smsRetrofit: ApiService,
     private val firebaseStorage: FirebaseStorage
 ) {
-    private var checkSms: Int = 0
 
     fun getAllEmailFromSheet() = flow {
         val response = smsRetrofit.getAllEmailFromSheet()
@@ -40,51 +40,58 @@ class SmsRepository(
         val response = smsRetrofit.getEmailByCheck()
         val responseCheck = smsRetrofit.getEmailScanned()
         try {
-            emit(DataState.Success(Pair(response,responseCheck)))
+            emit(DataState.Success(Pair(response, responseCheck)))
         } catch (exception: Exception) {
             emit(DataState.Error(exception))
         }
     }
 
-    private fun getDate(milliSeconds: Long): String? {
-        val formatter = SimpleDateFormat("dd-MM-yyyy hh-mm-ss-SSS", Locale.getDefault())
-        val calendar: Calendar = Calendar.getInstance()
-        calendar.timeInMillis = milliSeconds
-        return formatter.format(calendar.time)
-    }
-
-    fun saveImageAndPushSheet(data: Pair<String, Bitmap>) {
-        val storageRef = firebaseStorage.reference.root.child("QRCode").child(data.first)
-        val baos = ByteArrayOutputStream()
-        data.second.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val dataByteArray = baos.toByteArray()
-        val uploadTask = storageRef.putBytes(dataByteArray)
-        uploadTask.addOnFailureListener {
-            logError("Upload image failure")
-        }
-        uploadTask.addOnSuccessListener { _ ->
-            storageRef.downloadUrl.addOnSuccessListener {
-                val saveObject = SaveObject(
-                    action = "save",
-                    content = it.toString(),
-                    from = data.first
-                )
-                sendQrContent(saveObject)
-                logError("Upload image Success")
-            }
-        }
-    }
-
     @OptIn(DelicateCoroutinesApi::class)
-    fun sendQrContent(saveObject: SaveObject) {
-        GlobalScope.launch(Dispatchers.IO) {
-            smsRetrofit.sendQrContent(saveObject)
-            logError("Push To sheet")
-        }
+    suspend fun sendQrContent(saveObject: SaveObject) = flow<Unit> {
+        emit(smsRetrofit.sendQrContent(saveObject))
     }
 
     suspend fun sendQRScanObject(saveObject: SaveObject) {
         smsRetrofit.sendQrScanned(saveObject)
+    }
+
+    suspend fun sendQRScanned(saveObject: SaveObject) = flow {
+        emit(smsRetrofit.sendQrScanned(saveObject))
+    }
+
+    suspend fun awaitSinglePushValue(data: Pair<String, Bitmap>) = callbackFlow {
+        val storageRef = firebaseStorage.reference.root.child("QRCode").child(data.first)
+        val baos = ByteArrayOutputStream()
+        data.second.compress(Bitmap.CompressFormat.JPEG, 60, baos)
+        val dataByteArray = baos.toByteArray()
+
+        val uploadTask = storageRef.putBytes(dataByteArray)
+
+        val downloadUrlListener = OnSuccessListener<Uri> {
+            val saveObject = SaveObject(
+                action = "save",
+                content = it.toString(),
+                from = data.first
+            )
+            trySend(saveObject)
+            close()
+        }
+
+        val valueListener = OnSuccessListener<UploadTask.TaskSnapshot> {
+            storageRef.downloadUrl.addOnSuccessListener(downloadUrlListener)
+        }
+
+        val onFailureListener = OnFailureListener { logError("Upload image failure") }
+
+        uploadTask.addOnSuccessListener(valueListener)
+
+        uploadTask.addOnFailureListener(onFailureListener)
+
+
+        awaitClose {
+            uploadTask.removeOnFailureListener(onFailureListener)
+            uploadTask.removeOnSuccessListener(valueListener)
+        }
     }
 
 }
