@@ -31,7 +31,7 @@ class ConfirmViewModel @Inject constructor(
                         val listChecked = it.data.second
                         listData.forEach { data ->
                             val emailApi = data.substringBefore("-")
-                            if (emailApi == email.substringBefore("-")) {
+                            if (emailApi == email.substringBefore("-").trim()) {
                                 if (listChecked.contains(emailApi)) {
                                     return@map Triple(false, emailApi, TypeCheckIn.IsExited)
                                 } else {

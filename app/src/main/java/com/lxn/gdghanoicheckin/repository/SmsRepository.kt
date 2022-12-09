@@ -60,7 +60,7 @@ class SmsRepository(
     }
 
     suspend fun awaitSinglePushValue(data: Pair<String, Bitmap>) = callbackFlow {
-        val storageRef = firebaseStorage.reference.root.child("QRCode").child(data.first)
+        val storageRef = firebaseStorage.reference.root.child("QRCode").child(getRandomString(50))
         val baos = ByteArrayOutputStream()
         data.second.compress(Bitmap.CompressFormat.JPEG, 60, baos)
         val dataByteArray = baos.toByteArray()
@@ -70,11 +70,10 @@ class SmsRepository(
         val downloadUrlListener = OnSuccessListener<Uri> {
             val saveObject = SaveObject(
                 action = "save",
-                content = it.toString(),
+                content = it.toString().trim(),
                 from = data.first
             )
             trySend(saveObject)
-            close()
         }
 
         val valueListener = OnSuccessListener<UploadTask.TaskSnapshot> {
@@ -94,4 +93,10 @@ class SmsRepository(
         }
     }
 
+    fun getRandomString(length: Int): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (1..length)
+            .map { allowedChars.random() }
+            .joinToString("")
+    }
 }
