@@ -93,7 +93,7 @@ class SmsRepository(
         }
     }
 
-    fun getRandomString(length: Int): String {
+    private fun getRandomString(length: Int = 40): String {
         val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
         return (1..length)
             .map { allowedChars.random() }

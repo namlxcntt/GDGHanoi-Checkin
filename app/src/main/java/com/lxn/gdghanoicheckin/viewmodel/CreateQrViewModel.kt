@@ -61,7 +61,7 @@ class CreateQrViewModel @Inject constructor(
     private fun generatedQr(list: DataResponse) {
         viewModelScope.launch(Dispatchers.IO) {
             val listMerge: ArrayList<String> = ArrayList()
-            withContext(Dispatchers.Unconfined) {
+            withContext(Dispatchers.IO) {
                 list.forEach { dataResponse ->
                     val stringBuilder = StringBuilder()
                     dataResponse.forEachIndexed { index, subData ->
@@ -109,7 +109,7 @@ class CreateQrViewModel @Inject constructor(
                             }.launchIn(viewModelScope)
                     }
                 }
-                delay(10000L)
+                delay(5000L)
             }
         }
     }

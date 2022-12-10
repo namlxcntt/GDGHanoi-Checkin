@@ -19,7 +19,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginEnd="15dp"
         android:gravity="center"
-        android:text="Chào mừng đến với\nDevFest Hanoi 2022"
+        android:text="Chào mừng đến với\nGDG DevFest Hanoi 2022"
         android:textSize="@dimen/default_text_size_large"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
