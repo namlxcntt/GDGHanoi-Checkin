@@ -10,6 +10,7 @@ import com.lxn.gdghanoicheckin.R
 import com.lxn.gdghanoicheckin.popup.PopupRequirePassword
 import com.lxn.gdghanoicheckin.viewmodel.CreateQrViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.android.synthetic.main.activity_create_qractivity.*
 
 @AndroidEntryPoint
 class CreateQRActivity : AppCompatActivity() {
@@ -29,6 +30,7 @@ class CreateQRActivity : AppCompatActivity() {
         val popupRequirePassword = PopupRequirePassword.newInstance {
             viewModel.getAllEmailFromSheet()
             viewModel.uploadState.observe(this) {
+                tv_content.text = String.format("Upload Success: %s",it)
             }
         }
         popupRequirePassword.isCancelable = false

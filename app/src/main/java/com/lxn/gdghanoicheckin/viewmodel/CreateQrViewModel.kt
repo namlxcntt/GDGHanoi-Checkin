@@ -26,9 +26,9 @@ class CreateQrViewModel @Inject constructor(
     private val application: Application
 ) : ViewModel() {
 
-    private val _uploadState: MutableLiveData<Boolean> = MutableLiveData(false)
+    private val _uploadState: MutableLiveData<String> = MutableLiveData("")
 
-    val uploadState: LiveData<Boolean> get() = _uploadState
+    val uploadState: LiveData<String> get() = _uploadState
 
 
     init {
@@ -103,6 +103,7 @@ class CreateQrViewModel @Inject constructor(
                             .flowOn(Dispatchers.IO)
                             .onEach {
                                 Log.e("Namlxcntt","Push Data Success")
+                                _uploadState.value = data
                             }
                             .catch {
                                 Log.e("Namlxcntt", "Error ${it.message}")
